@@ -1,0 +1,50 @@
+# Also see the nginx docs, the Railscast example, and the H5BP
+# http://wiki.nginx.org/HttpCoreModule#Directives
+# https://github.com/railscasts/335-deploying-to-a-vps/blob/master/blog-nginx/config/nginx.conf
+# https://github.com/h5bp/server-configs/blob/master/nginx/nginx.conf
+
+# https://gist.github.com/711913#file_nginx_host.conf
+
+# This is meant to be served in a nginx/sites-available type folder structure, with one of these
+# files for each site you'd like to serve.
+
+# For useful app rewrites, see the Engine Yard post
+# http://www.engineyard.com/blog/2011/useful-rewrites-for-nginx/
+server {
+  listen 80;
+  
+  # Name the server is accessed with
+  # Can be an IP, an FQDN...
+  # Space separated list
+  server_name totallyrealfqdn.com;
+  
+  charset utf-8;
+
+  # Where the site is
+  root /home/deploy/apps/testing/current/public;
+  
+  # Try to access an actual file, else pass it to Passenger
+  try_files $uri /system/maintenance.html @passenger;
+  
+  location @passenger {
+    passenger_enabled on;
+  }
+
+  # A more generic caching solution.
+  # Change expires max to something like `expires 720h` (one month, or 1M) if
+  # you don't have cache-busting filenames (e.g. asset pipeline MD5 hashes)
+  # location ~ ^/(assets|images|javascripts|stylesheets|swfs|system)/ {
+  #   expires     max;
+  #   add_header  Cache-Control public;
+  #   add_header  Last-Modified "";
+  #   add_header  ETag "";
+  #   break;
+  # }
+  
+  client_max_body_size 4G;
+  keepalive_timeout 10;
+
+  # Uncomment these for no logging
+  # access_log /dev/null;
+  # error_log /dev/null;
+}
